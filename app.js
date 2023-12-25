@@ -16,11 +16,13 @@ document.addEventListener('DOMContentLoaded', () => {
     addTodo();
   });
 
+  // Memeriksa apakah storage (localStorage) tersedia sebelum memuat data
   if (isStorageExist()) {
     loadDataFromStorage();
   }
 });
 
+// Fungsi untuk membuat elemen tugas (todo) berdasarkan objek todo
 const makeTodo = (todoObject) => {
   // membuat tag h2 dengan javascript
   const textTitle = document.createElement('h2');
@@ -56,17 +58,23 @@ const makeTodo = (todoObject) => {
     container.append(undoButton, trashButton);
   } else {
     const chekButton = document.createElement('button');
+    const chekButton2 = document.createElement('button');
     chekButton.classList.add('check-button');
+    chekButton2.classList.add('trash-button');
 
     chekButton.addEventListener('click', () => {
       addTaskToComplate(todoObject.id);
     });
-    container.append(chekButton);
+    chekButton2.addEventListener('click', () => {
+      removeTaskFromComplated(todoObject.id);
+    });
+    container.append(chekButton, chekButton2);
   }
-
+  // ... (membuat elemen-elemen HTML untuk menampilkan tugas)
   return container;
 };
 
+// Fungsi untuk menambahkan tugas ke daftar selesai (completed)
 function addTaskToComplate(todoId) {
   const todoTarget = findTodo(todoId);
 
@@ -77,6 +85,7 @@ function addTaskToComplate(todoId) {
   saveData();
 }
 
+// Fungsi untuk mencari objek tugas berdasarkan ID
 function findTodo(todoId) {
   for (const todoItem of todos) {
     if (todoItem.id === todoId) {
@@ -86,6 +95,7 @@ function findTodo(todoId) {
   return null;
 }
 
+// Fungsi untuk menghapus tugas dari daftar selesai (completed) dan tidak (completed)
 function removeTaskFromComplated(todoId) {
   const todoTarget = findTodoIndex(todoId);
 
@@ -96,6 +106,7 @@ function removeTaskFromComplated(todoId) {
   saveData();
 }
 
+// Fungsi untuk mencari indeks tugas berdasarkan ID
 function findTodoIndex(todoId) {
   for (const index in todos) {
     if (todos[index].id === todoId) {
@@ -105,6 +116,7 @@ function findTodoIndex(todoId) {
   return -1;
 }
 
+// Fungsi untuk membatalkan tugas dari daftar selesai (completed)
 function undoTaskFromComplated(todoId) {
   const todoTarget = findTodo(todoId);
 
@@ -184,6 +196,7 @@ document.addEventListener(RENDER_EVENT, () => {
   }
 });
 
+// Konstanta dan fungsi untuk menangani penyimpanan data ke localStorage
 const SAVED_EVENT = 'saved-todo';
 const STORAGE_KEY = 'TODO_APPS';
 
@@ -195,7 +208,7 @@ const saveData = () => {
   }
 };
 
-// boeelan
+//  Fungsi untuk memeriksa apakah localStorage tersedia di browser(boelan)
 const isStorageExist = () => {
   if (typeof Storage === undefined) {
     alert('Browser kamu tidak mendukung local storage');
@@ -204,10 +217,23 @@ const isStorageExist = () => {
   return true;
 };
 
+// Event listener untuk menampilkan data yang tersimpan di localStorage
 document.addEventListener(SAVED_EVENT, () => {
+  const message = 'Data Todo berhasil ditambahkan';
+
+  // tampilakn toast menggunkan toastify
+  Toastify({
+    text: message,
+    duration: 3000,
+    gravity: 'bottom',
+    position: 'center',
+    backgroundColor: 'linear-gradient(to right, #00b09b, #96c93d)',
+  }).showToast();
+
   console.log(localStorage.getItem(STORAGE_KEY));
 });
 
+// Fungsi untuk memuat data dari localStorage saat aplikasi dimuat
 const loadDataFromStorage = () => {
   const serializeData = localStorage.getItem(STORAGE_KEY);
   let data = JSON.parse(serializeData);
