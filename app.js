@@ -15,6 +15,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Memanggil fungsi addTodo saat formulir dikirim
     addTodo();
   });
+
+  if (isStorageExist()) {
+    loadDataFromStorage();
+  }
 });
 
 const makeTodo = (todoObject) => {
@@ -70,6 +74,7 @@ function addTaskToComplate(todoId) {
 
   todoTarget.isComplated = true;
   document.dispatchEvent(new Event(RENDER_EVENT));
+  saveData();
 }
 
 function findTodo(todoId) {
@@ -88,6 +93,7 @@ function removeTaskFromComplated(todoId) {
 
   todos.splice(todoTarget, 1);
   document.dispatchEvent(new Event(RENDER_EVENT));
+  saveData();
 }
 
 function findTodoIndex(todoId) {
@@ -106,6 +112,7 @@ function undoTaskFromComplated(todoId) {
 
   todoTarget.isComplated = false;
   document.dispatchEvent(new Event(RENDER_EVENT));
+  saveData();
 }
 // Fungsi untuk menambahkan tugas baru
 const addTodo = () => {
@@ -140,6 +147,9 @@ const addTodo = () => {
 
   document.getElementById('title').value = '';
   document.getElementById('date').value = '';
+
+  document.dispatchEvent(new Event(RENDER_EVENT));
+  saveData();
 };
 
 // Fungsi untuk menghasilkan ID unik berdasarkan waktu saat ini
@@ -173,3 +183,39 @@ document.addEventListener(RENDER_EVENT, () => {
     else complateTODOList.append(todoElement);
   }
 });
+
+const SAVED_EVENT = 'saved-todo';
+const STORAGE_KEY = 'TODO_APPS';
+
+const saveData = () => {
+  if (isStorageExist()) {
+    const parsed = JSON.stringify(todos);
+    localStorage.setItem(STORAGE_KEY, parsed);
+    document.dispatchEvent(new Event(SAVED_EVENT));
+  }
+};
+
+// boeelan
+const isStorageExist = () => {
+  if (typeof Storage === undefined) {
+    alert('Browser kamu tidak mendukung local storage');
+    return false;
+  }
+  return true;
+};
+
+document.addEventListener(SAVED_EVENT, () => {
+  console.log(localStorage.getItem(STORAGE_KEY));
+});
+
+const loadDataFromStorage = () => {
+  const serializeData = localStorage.getItem(STORAGE_KEY);
+  let data = JSON.parse(serializeData);
+
+  if (data !== null) {
+    for (const todo of data) {
+      todos.push(todo);
+    }
+  }
+  document.dispatchEvent(new Event(RENDER_EVENT));
+};
